@@ -1,0 +1,231 @@
+public class QuotaPerformanceYearly {
+    
+    Public static List<QuotaAnuallWrapper> quotePerformanceYearly(string year){
+        List<QuotaAnuallWrapper> QAWList= new List<QuotaAnuallWrapper>();
+        
+        
+        String usrId = UserInfo.getUserId() ;
+        
+        Map<String, Schema.SObjectField> objfieldMap = Performance__c.sObjectType.getDescribe().fields.getMap();
+        String strfieldName = ''; 
+        for(Schema.SObjectField Field : objfieldMap.Values())
+        {
+            Schema.DescribeFieldResult fieldResult = Field.getDescribe();
+            strfieldName += fieldResult.getName() + ',';
+        }
+        
+        strfieldName = strfieldName.substring(0, strfieldName.length()-1);
+        strfieldName +=' , Quota_Sales_Employee__r.Name ';
+        strfieldName +=', Quota_Master__r.Name';
+        
+        
+        List<Performance__c> perList = new List<Performance__c>();
+        
+        if(year == 'All' || year == null){
+            QuotaAnuallWrapper QAW = new QuotaAnuallWrapper();    
+            perList= Database.query('select ' + strfieldName + 
+                                    ' from Performance__c where '+ 'Quota_Sales_Employee__r.User__c =: usrId ');
+            AggregateResult[] perList1= [SELECT Name,SUM(Actual_Revenue_Engines__c) ARES,sum(Quota_Revenue_Engines__c) QRES,sum(Performance_Revenue_Engines__c) PRES,
+                                         sum(Actual_Margin_Engines__c) AMES,sum(Performance_Margin_Engines__c)PMES,
+                                         sum(Actual_Margin_Non_Engine__c) AMNES,sum(Quota_Margin_Non_Engine__c) QMNES,sum(Performance_Margin_Non_Engine__c) PMNES,
+                                         sum(Performance_Revenue_Non_Engine__c) PRNES,sum(Actual_Revenue_TPE_All__c) ARTAS,sum(Quota_Revenue_TPE_All__c) QRTA,
+                                         sum(Performance_Revenue_TPE_All__c) PETSA,sum(Actual_Margin_TPE_All__c) AMTSA,sum(Quota_Margin_TPE_All__c) QMTAS,
+                                         sum(Performance_Margin_TPE_ALL__c) PMTAS,sum(Actual_Revenue_Total__c) ARTS,sum(Quota_Revenue_Total__c) QRTS,
+                                         sum(Performance_Revenue_Total__c) PRTS,sum(Actual_Margin_Total__c) AMTS,sum(Quota_Margin_Total__c) QMTS                                         
+                                         FROM  Performance__c where Quota_Sales_Employee__r.User__c =: usrId  GROUP BY Name];
+            QAWList.add(QAW); 
+            
+        }
+        else{
+            QuotaAnuallWrapper QAW = new QuotaAnuallWrapper();  
+            
+            perList = Database.query('select ' + strfieldName + 
+                                     ' from Performance__c where '+ 'Quota_Sales_Employee__r.User__c =: usrId and Year__c=:year' );
+            
+            for(performance__c perf : perList){
+                QAW.Year = perf.Year__c;
+                QAW.ActualRevenueEngines  =  + perf.Actual_Revenue_Engines__c ;
+                QAW.QuotaRevenueEngines = + perf.Quota_Revenue_Engines__c;
+                QAW.PerformanceRevenueEngines = + perf.Performance_Revenue_Engines__c;
+                
+                QAW.ActualMarginEngines = + perf.Actual_Margin_Engines__c ;
+                QAW.QuotaMarginEngines = + perf.Actual_Margin_Engines__c ;
+                QAW.PerformanceMarginEngines = + perf.Performance_Margin_Engines__c ;
+                
+                QAW.ActualMarginNonEngine = + perf.Actual_Margin_Non_Engine__c ;
+                QAW.QuotaMarginNonEngine = + perf.Quota_Margin_Non_Engine__c ;
+                QAW.PerformanceMarginNonEngine = + perf.Performance_Margin_Non_Engine__c ;
+                
+                QAW.ActualRevenueNonEngine = + perf.Performance_Revenue_Non_Engine__c ;
+                QAW.QuotaRevenueNonEngine = + perf.Quota_Revenue_Non_Engine__c ;
+                QAW.PerformanceRevenueNonEngine = + perf.Performance_Revenue_Non_Engine__c ;
+                
+                QAW.ActualRevenueTPEAll = + perf.Actual_Revenue_TPE_All__c ;
+                QAW.QuotaRevenueTPEAll = + perf.Quota_Revenue_TPE_All__c;     
+                QAW.PerformanceRevenueTPEAll = + perf.Performance_Revenue_TPE_All__c ;
+                
+                QAW.ActualMarginTPEAll = + perf.Actual_Margin_TPE_All__c ;
+                QAW.QuotaMarginTPEAll = + perf.Quota_Margin_TPE_All__c ;
+                QAW.PerformanceMarginTPEAll  = perf.Performance_Margin_TPE_ALL__c ;
+                
+                QAW.ActualRevenueTotal = + Perf.Actual_Revenue_Total__c ;
+                QAW.QuotaRevenueTotal = + perf.Quota_Revenue_Total__c ;
+                QAW.PerformanceRevenueTotal =+ perf.Performance_Revenue_Total__c ;
+                
+                QAW.ActualMarginTotal = + Perf.Actual_Margin_Total__c ;
+                QAW.QuotaMarginTotal = +perf.Quota_Margin_Total__c ;
+                QAW.PerformanceMarginTotal= + perf.Performance_Margin_Total__c ;
+                
+                QAW.ActualRevenueTFE731 = + Perf.Actual_Revenue_TFE_731__c ;
+                QAW.QuotaRevenueTFE731 = + Perf.Quota_Revenue_TFE731__c ;
+                QAW.PerformanceRevenueTFE731 = + Perf.Performance_Revenue_TFE731__c;
+                
+                QAW.ActualMarginTFE731 = + Perf.Actual_Margin_TFE_731__c;
+                QAW.QuotaMarginTFE731 = + Perf.Actual_Margin_TFE_731__c ;
+                QAW.PerformanceMarginTFE731 = + Perf.Performance_Revenue_TFE731__c;
+                
+                QAW.ActualRevenueAirframe = + Perf.Actual_Revenue_Airframe__c;
+                QAW.QuotaRevenueAirframe = + Perf.Actual_Revenue_Airframe__c;
+                QAW.PerformanceRevenueAirframe = + Perf.Actual_Margin_Airframe__c;
+                
+                QAW.ActualMarginAirframe= + Perf.Actual_Margin_Airframe__c;
+                QAW.QuotaMarginAirframe = + Perf.Actual_Margin_Airframe__c;
+                QAW.PerformanceMarginAirframe = + Perf.Performance_Margin_Airframe__c;
+                
+                QAW.ActualRevenueHTF= + perf.Actual_Revenue_HTF__c;
+                QAW.QuotaRevenueHTF = + Perf.Quota_Revenue_HTF__c; 
+                QAW.PerformanceRevenueHTF = + perf.Performance_Revenue_HTF__c;     
+                
+                QAW.ActualMarginHTF = + Perf.Actual_Margin_HTF__c;
+                QAW.QuotaMarginHTF = + Perf.Actual_Margin_HTF__c;
+                QAW.PerformanceMarginHTF = + Perf.Performance_Margin_HTF__c;  
+                
+                QAW.ActualRevenueCFE738= + perf.Actual_Revenue_CFE__c;
+                QAW.QuotaRevenueCFE738 = + Perf.Quota_Revenue_CFE738__c;
+                QAW.PerformanceRevenueCFE738= + Perf.Performance_Revenue_CFE738__c;
+                
+                QAW.ActualMarginCFE738 = +perf.Actual_Margin_CFE__c;
+                QAW.QuotaMarginCFE738 = + perf.Quota_Margin_CFE738__c;
+                QAW.PerformanceMarginCFE738= +perf.Performance_Margin_CFE738__c;   
+                
+                QAW.ActualRevenueTPEAll = +perf.Actual_Revenue_TPE_All__c; 
+                QAW.QuotaRevenueTPEAll = + perf.Quota_Revenue_TPE_All__c;   
+                QAW.PerformanceRevenueTPEAll = + Perf.Performance_Revenue_TPE_All__c;
+                
+                QAW.ActualMarginTPEAll = + perf.Actual_Margin_TPE_All__c;
+                QAW.QuotaMarginTPEAll = + perf.Quota_Margin_TPE_All__c ;
+                QAW.PerformanceMarginTPEALL = + perf.Performance_Margin_TPE_ALL__c;
+                
+                QAW.ActualRevenuePW300 = + perf.Actual_Revenue_PW_300__c;
+                QAW.QuotaRevenuePW300 = + perf.Quota_Revenue_PWC__c ;
+                QAW.PerformanceRevenuePW300 = +perf.Performance_Revenue_PWC__c; 
+                
+                QAW.ActualMarginPW300 = + perf.Actual_Margin_PW_300__c;
+                QAW.QuotaMarginPW300 = + Perf.Quota_Margin_PWC__c;
+                QAW.PerformanceMarginPW300 =+ Perf.Performance_Margin_PWC__c;
+                
+                QAW.ActualRevenuePW300Offload = +perf.Actual_Revenue_PW300_Offload__c;
+                QAW.QuotaRevenuePW300Offload = + Perf.Quota_Revenue_PW300_Offload__c;
+                QAW.PerformanceRevenuePW300Offload = + Perf.Performance_Revenue_PW300_Offload__c;
+                
+                QAW.ActualMarginPW300Offload = + perf.Actual_Margin_PW300_Offload__c;
+                QAW.QuotaMarginPW300Offload = + Perf.Quota_Margin_PW300_Offload__c;
+                QAW.PerformanceMarginPW300Offload = + perf.Performance_Margin_PW300_Offload__c;
+                
+                QAW.ActualRevenueOtherEngine = + Perf.Actual_Revenue_Other_Engines__c;
+                QAW.QuotaRevenueOtherEngine = + Perf.Quota_Revenue_Other_Engine__c;
+                QAW.PerformanceRevenueOtherEngine = + Perf.Performance_Revenue_Other_Engine__c;
+                
+                QAW.ActualMarginOtherEngine = + Perf.Actual_Margin_Other_Engines__c;
+                QAW.QuotaMarginOtherEngine = + Perf.Quota_Margin_Other_Engine__c;
+                QAW.PerformanceMarginOtherEngine = + Perf.Performance_Margin_Other_Engine__c;
+                
+                QAW.ActualRevenueAPU = + Perf.Actual_Revenue_APU__c;
+                QAW.QuotaRevenueAPU= + perf.Quota_Revenue_APU__c;
+                QAW.PerformanceRevenueAPU= + Perf.Performance_Revenue_APU__c;
+                
+                QAW.ActualMarginAPU = + perf.Actual_Margin_APU__c;
+                QAW.QuotaMarginAPU = + perf.Quota_Margin_APU__c;
+                QAW.PerformanceMarginAPU= + Perf.Performance_Margin_APU__c;
+                
+                QAW.ActualRevenueAE3007 = + perf.Actual_Revenue_AE3007__c;
+                QAW.QuotaRevenueAE3007 = + Perf.Quota_Revenue_AE3007__c;
+                QAW.PerformanceRevenueAE3007 = + Perf.Performance_Revenue_AE3007__c;     
+                
+                QAW.ActualMarginAE3007 = + Perf.Actual_Margin_AE3007__c;
+                QAW.QuotaMarginAE3007=+ Perf.Quota_Margin_AE3007__c;
+                QAW.PerformanceMarginAE3007 = + perf.Performance_Margin_AE3007__c;
+                
+                QAW.ActualRevenueEngineExchange = + Perf.Actual_Revenue_Engine_Exchange__c;
+                QAW.QuotaRevenueEngineExchange = + Perf.Quota_Revenue_Engine_Exchange__c;
+                QAW.PerformanceRevenueEngineExchange = perf.Performance_Revenue_Engine_Exchange__c;
+                
+                QAW.ActualMarginEngineExchange = + Perf.Actual_Margin_Engine_Exchange__c;
+                QAW.QuotaMarginEngineExchange = + perf.Quota_Margin_Engine_Exchange__c;
+                QAW.PerformanceMarginEngineExchange = + perf.Performance_Margin_Engine_Exchange__c;
+                
+                QAW.ActualRevenueAvionics = + Perf.Actual_Revenue_Avionics__c;
+                QAW.QuotaRevenueAvionics = + Perf.Quota_Revenue_Avionics__c;
+                QAW.PerformanceRevenueAvionics = + Perf.Performance_Revenue_Avionics__c;
+                
+                QAW.ActualMarginAvionics = + Perf.Actual_Margin_Avionics__c;
+                QAW.QuotaMarginAvionics = + Perf.Quota_Margin_Avionics__c;
+                QAW.PerformanceMarginAvionics = + Perf.Performance_Margin_Avionics__c;
+                
+                QAW.ActualRevenueEngineSplits = + Perf.Actual_Revenue_Engines_Split__c;
+                QAW.ActualRevenueNonEngineSplits = + Perf.Actual_Revenue_Non_Engine_Splits__c;
+                QAW.ActualRevenueOther = + Perf.Actual_Revenue_Other__c;
+                QAW.ActualRevenueInteriorMods =+ Perf.Actual_Revenue_Interior_Mod__c;
+                QAW.QuotaRevenueInteriorMods = + Perf.Quota_Revenue_Interior_Mods__c;
+                QAW.PerformanceRevenueInteriorMods = + Perf.Performance_Revenue_Interior_Mods__c;
+                
+                QAW.ActualMarginEnginesSplits = + Perf.Actual_Margin_Engines_Splits__c;
+                QAW.ActualMarginNonEngineSplits = + Perf.Actual_Margin_Non_Engine_Splits__c;
+                QAW.ActualMarginOther = + Perf.Actual_Margin_Other__c;
+                QAW.ActualMarginInteriorMods =+ Perf.Actual_Margin_Interior_Mod__c;
+                QAW.QuotaMarginInteriorMods = + Perf.Quota_Margin_Interior_Mods__c;
+                QAW.PerformanceMarginInteriorMods = + Perf.Performance_Margin_Interior_Mods__c;
+                
+                QAW.ActualRevenuePaint = + Perf.Actual_Revenue_Paint__c;
+                QAW.QuotaRevenuePaint = +  Perf.Quota_Revenue_Paint__c;
+                QAW.PerformanceRevenuePaint = + Perf.Performance_Revenue_Paint__c;
+                
+                QAW.ActualMarginPaint = + Perf.Actual_Margin_Paint__c;
+                QAW.QuotaMarginPaint = + Perf.Quota_Margin_Paint__c;
+                QAW.PerformanceMarginPaint = + Perf.Performance_Margin_Paint__c ;
+                
+                QAW.ActualRevenueODA = + Perf.Actual_Revenue_ODA__c;
+                QAW.QuotaRevenueODA = + Perf.Quota_Revenue_ODA__c;
+                QAW.PerformanceRevenueODA = + Perf.Performance_Revenue_ODA__c;
+                
+                
+                QAW.ActualMarginODA = + Perf.Actual_Margin_ODA__c;
+                QAW.QuotaMarginODA = + Perf.Quota_Margin_ODA__c;
+                QAW.PerformanceMarginODA =+ Perf.Performance_Margin_ODA__c;   
+                QAW.ActualMarginPaint = + Perf.Actual_Margin_Paint__c;
+                QAW.QuotaMarginPaint = + Perf.Quota_Margin_Paint__c;
+                QAW.PerformanceMarginPaint = + Perf.Performance_Margin_Paint__c ;
+                
+                QAW.ActualRevenueODA = + Perf.Actual_Revenue_ODA__c;
+                QAW.QuotaRevenueODA = + Perf.Quota_Revenue_ODA__c;
+                QAW.PerformanceRevenueODA = + Perf.Performance_Revenue_ODA__c;
+                
+                
+                QAW.ActualMarginODA = + Perf.Actual_Margin_ODA__c;
+                QAW.QuotaMarginODA = + Perf.Quota_Margin_ODA__c;
+                QAW.PerformanceMarginODA =+ Perf.Performance_Margin_ODA__c;   
+                QAW.ActualRevenuePPE = + Perf.Actual_Revenue_PPE__c;
+                QAW.QuotaRevenuePPE = + Perf.Quota_Revenue_PPE__c;
+                QAW.PerformanceRevenuePPE = + Perf.Performance_Revenue_PPE__c;
+                
+                QAW.ActualMarginPPE = + Perf.Actual_Margin_PPE__c;
+                QAW.QuotaMarginPPE = + Perf.Quota_Margin_PPE__c;
+                QAW.PerformanceMarginPPE = + Perf.Performance_Margin_PPE__c;    
+            }  
+            QAWList.add(QAW);
+        }
+        return QAWList;
+        
+    }
+    
+}
